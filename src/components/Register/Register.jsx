@@ -1,8 +1,12 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+} from "firebase/auth";
 import auth from "../HeroRegister/firebase.config";
 import { useState } from "react";
-// import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icon/ai";
-// import {AiOutline}
+import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
+import { Link } from "react-router-dom";
 
 const Register = () => {
   const [registerError, setRegisterError] = useState("");
@@ -21,9 +25,11 @@ const Register = () => {
   const handleRegister = e => {
     e.preventDefault();
     // E.TARGET=>FORM. EMAIL=> FIELD NAME. VALUE=> VALUE.
+    const name = e.target.name.value;
     const email = e.target.email.value;
     const password = e.target.password.value;
-    console.log(email, password);
+    const accepted = e.target.terms.checked;
+    console.log(email, password, accepted);
     // console.log(e.target.email);
 
     // reset error
@@ -39,13 +45,33 @@ const Register = () => {
         "Your password should have at least one upper case characters."
       );
       return;
+    } else if (!accepted) {
+      setRegisterError("Please accept our terms and condition");
+      return;
     }
     // create a user
     createUserWithEmailAndPassword(auth, email, password)
       .then(result => {
         // const user =
-        console.log(result);
+        console.log(result.user);
         setSuccess("user created successfully");
+
+        // update profile
+        updateProfile(result.user, {
+          displayName: name,
+          photoURL: "https://example.com/jane-q-user/profile.jpg",
+        })
+          .then(() => {
+            console.log("profile updated");
+          })
+          .catch(error => {
+            console.log(error);
+          });
+
+        // send verification email
+        sendEmailVerification(result.user).then(() => {
+          alert("Please check your email and verification your account");
+        });
       })
       .catch(error => {
         console.log(error);
@@ -64,6 +90,15 @@ const Register = () => {
         <form onSubmit={handleRegister}>
           <input
             className="mb-4 md:ml-20  xl:ml-40text-xl p-2 bg-gray-100 rounded-md border w-full md:w-3/4"
+            type="text"
+            placeholder="Your Name"
+            name="name"
+            id="x"
+            required
+          />
+          <br />
+          <input
+            className="mb-4 md:ml-20  xl:ml-40text-xl p-2 bg-gray-100 rounded-md border w-full md:w-3/4"
             type="email"
             placeholder="email address"
             name="email"
@@ -71,24 +106,33 @@ const Register = () => {
             required
           />
           <br />
-          <input
-            className="mb-4 md:ml-20 xl:ml-40text-xl  p-2 bg-gray-100 rounded-md border w-full md:w-3/4"
-            // type={showAndHidePass}
-            type={showAndHidePass ? "text" : "password"}
-            placeholder="password"
-            name="password"
-            id="y"
-            required
-          />
-          <span
-            className="btn btn-ghost"
-            // onClick={handleShowAndHidePass}
-            onClick={() => setShowAndHidePass(!showAndHidePass)}
-          >
-            {/* <AiOutlineEye></AiOutlineEye> */}
-            {showAndHidePass ? "Hide" : "Show"}
-          </span>
+          <div className="relative">
+            <input
+              className=" md:ml-20 xl:ml-40text-xl  p-2 bg-gray-100 rounded-md border w-full md:w-3/4"
+              // type={showAndHidePass}
+              type={showAndHidePass ? "text" : "password"}
+              placeholder="password"
+              name="password"
+              id="y"
+              required
+            />
+            <span
+              className="absolute top-3 md:right-[125px] lg:right-80"
+              // onClick={handleShowAndHidePass}
+              onClick={() => setShowAndHidePass(!showAndHidePass)}
+            >
+              {showAndHidePass ? (
+                <AiFillEye></AiFillEye>
+              ) : (
+                <AiFillEyeInvisible></AiFillEyeInvisible>
+              )}
+            </span>
+          </div>
           <br />
+          <input type="checkbox" name="terms" id="terms" />
+          <label htmlFor="termss">
+            Accept our <a href="#">Terms and condition</a>
+          </label>
           <div className=" md:ml-20 xl:ml-40text-xl mb-4 md:ml-xl:ml-4020 p-4 text-center  w-3/4">
             <input
               className="btn btn-secondary"
@@ -99,6 +143,12 @@ const Register = () => {
               required
             />
           </div>
+          <p>
+            Already have an account? Please
+            <Link className="btn btn-success btn-sm" to="/login">
+              Login
+            </Link>
+          </p>
         </form>
       </div>
     </div>
