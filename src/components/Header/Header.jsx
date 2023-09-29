@@ -12,6 +12,9 @@ const Header = () => {
       <button className="btn">
         <NavLink to="/register">Register</NavLink>
       </button>
+      <button className="btn">
+        <NavLink to="/heroRegister">Register Hero</NavLink>
+      </button>
     </div>
   );
 
