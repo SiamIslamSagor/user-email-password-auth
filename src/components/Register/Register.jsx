@@ -1,10 +1,22 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import auth from "../HeroRegister/firebase.config";
 import { useState } from "react";
+// import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icon/ai";
+// import {AiOutline}
 
 const Register = () => {
   const [registerError, setRegisterError] = useState("");
   const [success, setSuccess] = useState("");
+  // const [showAndHidePass, setShowAndHidePass] = useState("password");
+  const [showAndHidePass, setShowAndHidePass] = useState(false);
+
+  /* const handleShowAndHidePass = () => {
+    if (showAndHidePass === "text") {
+      setShowAndHidePass("password");
+    } else {
+      setShowAndHidePass("text");
+    }
+  }; */
 
   const handleRegister = e => {
     e.preventDefault();
@@ -22,8 +34,12 @@ const Register = () => {
     if (password.length < 6) {
       setRegisterError("Password is to short, please set 6 char long password");
       return;
+    } else if (!/[A-Z]/.test(password)) {
+      setRegisterError(
+        "Your password should have at least one upper case characters."
+      );
+      return;
     }
-
     // create a user
     createUserWithEmailAndPassword(auth, email, password)
       .then(result => {
@@ -57,12 +73,21 @@ const Register = () => {
           <br />
           <input
             className="mb-4 md:ml-20 xl:ml-40text-xl  p-2 bg-gray-100 rounded-md border w-full md:w-3/4"
-            type="password"
+            // type={showAndHidePass}
+            type={showAndHidePass ? "text" : "password"}
             placeholder="password"
             name="password"
             id="y"
             required
           />
+          <span
+            className="btn btn-ghost"
+            // onClick={handleShowAndHidePass}
+            onClick={() => setShowAndHidePass(!showAndHidePass)}
+          >
+            {/* <AiOutlineEye></AiOutlineEye> */}
+            {showAndHidePass ? "Hide" : "Show"}
+          </span>
           <br />
           <div className=" md:ml-20 xl:ml-40text-xl mb-4 md:ml-xl:ml-4020 p-4 text-center  w-3/4">
             <input
